@@ -108,6 +108,7 @@ export function OnboardingFlow() {
   const [ingredientSeverity, setIngredientSeverity] = useState<Severity>("sensitivity");
   const [suggestions, setSuggestions] = useState<IngredientSuggestion[]>([]);
   const [response, setResponse] = useState<RecommendationResponse | null>(null);
+  const [requestError, setRequestError] = useState<string | null>(null);
   const [sortMode, setSortMode] = useState("match");
 
   const request = useMemo(() => buildRecommendationRequest(state), [state]);
@@ -117,7 +118,11 @@ export function OnboardingFlow() {
 
   async function updateIngredientSuggestions(value: string) {
     setIngredientQuery(value);
-    setSuggestions(await fetchIngredientSuggestions(value));
+    try {
+      setSuggestions(await fetchIngredientSuggestions(value));
+    } catch {
+      setSuggestions([]);
+    }
   }
 
   function addAvoidedIngredient(term: string) {
@@ -136,7 +141,13 @@ export function OnboardingFlow() {
   }
 
   async function showResults() {
-    setResponse(await fetchRecommendations(buildRecommendationRequest({ ...state, ...applyInferredFilters(state, inferredFilters) })));
+    setRequestError(null);
+    try {
+      setResponse(await fetchRecommendations(buildRecommendationRequest({ ...state, ...applyInferredFilters(state, inferredFilters) })));
+    } catch {
+      setResponse(null);
+      setRequestError("Recommendations are unavailable right now. Check the local server and API configuration, then try again.");
+    }
   }
 
   return (
@@ -331,13 +342,18 @@ export function OnboardingFlow() {
 
       <RecommendationResults
         response={response}
+        error={requestError}
         sortMode={sortMode}
         onSortModeChange={setSortMode}
         strictSafetyMode={state.strictSafetyMode}
         onStrictSafetyModeChange={(strictSafetyMode) => {
           const next = { ...state, strictSafetyMode };
           setState(next);
-          fetchRecommendations(buildRecommendationRequest(next)).then(setResponse);
+          setRequestError(null);
+          fetchRecommendations(buildRecommendationRequest(next)).then(setResponse).catch(() => {
+            setResponse(null);
+            setRequestError("Recommendations are unavailable right now. Check the local server and API configuration, then try again.");
+          });
         }}
       />
     </>

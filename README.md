@@ -1,73 +1,93 @@
-# Face-Findr V2 Integration Notes
+# Face-Findr V2
 
-Face-Findr V2 is being prepared as a deterministic beauty recommendation MVP. The current repository contains a v2 skeleton under `src/`, normalized data artifacts under `data/`, legacy v1 assets under `v1/`, and tests under `tests/`.
+Face-Findr V2 is a deterministic beauty recommendation MVP for makeup, skincare, and haircare products. A user completes onboarding, submits structured preferences to `POST /api/recommendations`, and receives ranked product cards with match reasons, safety notes, and ingredient data-quality labels.
 
-This project must treat allergies, sensitivities, skin/scalp/hair concerns, and free-text notes as sensitive preference data. Recommendations are informational and must be based on available product and ingredient data.
+The legacy application is preserved under `v1/`. The V2 app lives under `src/` and uses the scraped dataset in `raw_data/merge_df.csv`.
 
-## Local Setup
+## Safety Model
+
+- Hard ingredient exclusions are deterministic and use parser, alias, and ingredient-group matching.
+- LLM output is never allowed to decide whether a product contains an avoided ingredient.
+- Strict safety mode defaults on for allergies and sensitivities.
+- In strict safety mode, products with missing or unparseable ingredient data are excluded when allergy or sensitivity filters are active.
+- Recommendations are informational. Face-Findr does not diagnose, treat, or guarantee that any product is safe or reaction-free.
+
+## Setup
 
 Prerequisites:
 
-- Node.js with built-in `node:test` support and TypeScript import support for the existing `.ts` tests.
-- No root package manifest is currently present. Do not run dependency installation from the repository root until a root `package.json` is added.
-- The legacy v1 static app has its own `v1/package.json`; it is separate from the v2 skeleton.
+- Node.js 22 or newer.
+- npm 11 or newer.
 
-Useful commands:
+Install dependencies:
+
+```powershell
+npm install
+```
+
+Run the V2 app:
+
+```powershell
+npm run dev
+```
+
+Then open `http://localhost:3000`.
+
+Optional local mock mode:
+
+```powershell
+$env:NEXT_PUBLIC_FACE_FINDR_USE_MOCKS="true"
+npm run dev
+```
+
+Mock mode is isolated in `src/components/recommendationsClient.ts`; the default frontend path calls the live API routes.
+
+## Data Commands
+
+```powershell
+npm run data:audit
+npm run data:normalize
+```
+
+Generated outputs:
+
+- `docs/data_audit_report.md`
+- `data/normalized_products.json`
+- `data/product_ingredients.json`
+
+Current audit summary: 1,718 rows, 2 missing ingredient lists, 43 invalid prices, 6 invalid ratings, 2 malformed URLs, and 1 unknown category row.
+
+## Quality Commands
+
+```powershell
+npm test
+npm run lint
+npm run typecheck
+npm run build
+```
+
+The Node test suite can also run without installed root dependencies:
 
 ```powershell
 node --test tests/backend/*.test.ts tests/data-pipeline/*.test.js tests/frontend/*.test.js
-node --test tests/data-pipeline/*.test.js tests/frontend/*.test.js
 ```
-
-The first command is the intended full quality check. The second command is a fallback if the local Node runtime cannot execute TypeScript test files directly.
 
 ## Environment Variables
 
-The LLM adapter is disabled unless explicitly enabled:
+LLM integration is optional and disabled by default:
 
-- `FACE_FINDR_LLM_ENABLED=true` enables an OpenAI-compatible backend-only adapter.
-- `FACE_FINDR_LLM_API_KEY` stores the server-side model key. Never expose this to frontend code.
-- `FACE_FINDR_LLM_ENDPOINT` overrides the chat-completions endpoint.
-- `FACE_FINDR_LLM_MODEL` defaults to `gpt-5.4-mini`.
-- `FACE_FINDR_LLM_TIMEOUT_MS` defaults to `4000`.
+- `FACE_FINDR_LLM_ENABLED=true`
+- `FACE_FINDR_LLM_API_KEY`
+- `FACE_FINDR_LLM_ENDPOINT`
+- `FACE_FINDR_LLM_MODEL` defaults to `gpt-5.4-mini`
+- `FACE_FINDR_LLM_TIMEOUT_MS` defaults to `4000`
 
-Production integration must redact or avoid logging raw free-text notes, allergy terms, sensitivities, API keys, request headers containing secrets, and model prompts containing user-entered sensitive preference data.
+Frontend local mock mode:
 
-## Data And Import Assumptions
+- `NEXT_PUBLIC_FACE_FINDR_USE_MOCKS=true`
 
-- `raw_data/merge_df.csv` is the source dataset described by the implementation plan.
-- Normalized artifacts in `data/` are generated/reference data and should remain traceable to scraped source fields.
-- Scraped product names, details, ingredients, URLs, stores, and claims are untrusted input.
-- Product URLs must be validated before rendering or linking. Only `http:` and `https:` retailer URLs should be clickable.
-- Missing or unparseable ingredient lists are not safe evidence that a product avoids an ingredient.
+No API key is required for the deterministic MVP flow.
 
-## Security And Privacy Expectations
+## API Contracts
 
-- Use schema validation for every API request.
-- Apply hard ingredient exclusions deterministically from parsed ingredients, aliases, and ingredient groups.
-- Never use an LLM to decide whether a product contains an avoided ingredient.
-- Default strict safety mode to enabled when a user enters an allergy or sensitivity.
-- Keep API keys server-side and use HTTPS in production.
-- Sanitize scraped text before rendering.
-- Do not store raw free-text health/allergy notes unless the user explicitly saves a profile.
-- Provide anonymous recommendations without account creation for MVP.
-
-## Approved Disclaimer Language
-
-Use this language in the app near allergy inputs and recommendation results:
-
-> Face-Findr recommendations are informational and based on available product and ingredient data. Ingredient lists can be incomplete or change over time, so Face-Findr cannot guarantee that a product is safe, medically suitable, or reaction-free. Patch test when appropriate and consult a dermatologist, allergist, or medical professional for severe allergies, persistent symptoms, or reactions.
-
-Avoid claims such as "safe for allergies", "dermatologist approved for you", "guaranteed non-reactive", or diagnosis/treatment language.
-
-## Current Quality Checks
-
-Tests currently cover:
-
-- Ingredient parsing and alias/group matching.
-- Recommendation hard exclusions and strict-mode incomplete-data behavior.
-- Recommendation schema validation.
-- LLM disabled/invalid-output fallback behavior.
-- Static frontend contract checks for safety copy and required UI text.
-
-See [docs/qa_integration_handoff.md](docs/qa_integration_handoff.md) for MVP acceptance criteria, risks, blockers, and final integration checks.
+See [docs/api_contract.md](docs/api_contract.md).

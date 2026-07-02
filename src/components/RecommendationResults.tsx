@@ -6,6 +6,7 @@ import { SafetyNotice } from "./SafetyNotice";
 
 type RecommendationResultsProps = {
   response: RecommendationResponse | null;
+  error?: string | null;
   sortMode: string;
   onSortModeChange: (value: string) => void;
   strictSafetyMode: boolean;
@@ -14,6 +15,7 @@ type RecommendationResultsProps = {
 
 export function RecommendationResults({
   response,
+  error,
   sortMode,
   onSortModeChange,
   strictSafetyMode,
@@ -27,8 +29,8 @@ export function RecommendationResults({
         <span className="eyebrow">Your shelf shortlist</span>
         <h2 id="results-heading">Recommendations</h2>
         <p>
-          Mock results show the intended API shape and product-card behavior while the backend recommendation endpoint
-          is being connected.
+          Results come from deterministic category, ingredient-exclusion, and ranking logic using the available product
+          data. Ingredient confidence is shown so incomplete records are not treated as guarantees.
         </p>
       </div>
 
@@ -55,11 +57,16 @@ export function RecommendationResults({
 
       {response && (
         <p className="result-count" aria-live="polite">
-          Showing {sortedResults.length} mock matches. {response.totalExcluded} product(s) filtered out.
+          Showing {sortedResults.length} match(es). {response.totalExcluded} product(s) filtered out.
         </p>
       )}
 
-      {response?.noResultsReason ? (
+      {error ? (
+        <div className="empty-state" role="status">
+          <h3>Recommendations unavailable</h3>
+          <p>{error}</p>
+        </div>
+      ) : response?.noResultsReason ? (
         <div className="empty-state" role="status">
           <h3>No products match every strict filter</h3>
           <p>{response.noResultsReason}</p>

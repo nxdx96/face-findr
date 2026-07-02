@@ -114,12 +114,28 @@ export async function fetchIngredientSuggestions(query: string): Promise<Ingredi
   const normalized = query.trim().toLowerCase();
   if (normalized.length < 2) return [];
 
-  return INGREDIENT_SUGGESTIONS.filter((suggestion) =>
-    `${suggestion.canonicalName} ${suggestion.alias} ${suggestion.group ?? ""}`.toLowerCase().includes(normalized),
-  );
+  if (useLocalMocks()) return filterMockIngredientSuggestions(normalized);
+
+  const response = await fetch(`/api/ingredients/search?q=${encodeURIComponent(query)}&limit=10`, {
+    headers: { accept: "application/json" },
+  });
+  if (!response.ok) throw new Error(`Ingredient search failed with status ${response.status}`);
+
+  const payload = (await response.json()) as { results?: IngredientSuggestion[] };
+  return Array.isArray(payload.results) ? payload.results : [];
 }
 
 export async function fetchRecommendations(request: RecommendationRequest): Promise<RecommendationResponse> {
+  if (!useLocalMocks()) {
+    const response = await fetch("/api/recommendations", {
+      method: "POST",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify(request),
+    });
+    if (!response.ok) throw new Error(`Recommendation request failed with status ${response.status}`);
+    return (await response.json()) as RecommendationResponse;
+  }
+
   const results = buildMockResults(request);
   const totalExcluded = MOCK_PRODUCTS.length - results.length;
 
@@ -138,6 +154,16 @@ export async function fetchRecommendations(request: RecommendationRequest): Prom
         ? "Strict exclusions and filters removed every mock product. Loosen a preference, raise your budget, or allow incomplete ingredient data."
         : undefined,
   };
+}
+
+function useLocalMocks(): boolean {
+  return process.env.NEXT_PUBLIC_FACE_FINDR_USE_MOCKS === "true";
+}
+
+function filterMockIngredientSuggestions(normalized: string): IngredientSuggestion[] {
+  return INGREDIENT_SUGGESTIONS.filter((suggestion) =>
+    `${suggestion.canonicalName} ${suggestion.alias} ${suggestion.group ?? ""}`.toLowerCase().includes(normalized),
+  );
 }
 
 function buildMockResults(request: RecommendationRequest): RecommendationResult[] {
