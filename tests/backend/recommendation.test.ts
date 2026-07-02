@@ -123,6 +123,47 @@ test("strict safety mode excludes missing ingredient data for allergy filters", 
   assert.equal(response.totalExcluded, 1);
 });
 
+test("non-strict mode keeps incomplete ingredient data but labels the uncertainty", () => {
+  const products: Product[] = [
+    baseProduct,
+    {
+      ...baseProduct,
+      id: "partial-1",
+      name: "Partially Documented Shampoo",
+      ingredients: "",
+      dataQuality: "missing-ingredients",
+    },
+  ];
+
+  const response = recommendProducts(
+    products,
+    request({
+      avoidedIngredients: [{ term: "fragrance", severity: "preference" }],
+      strictSafetyMode: false,
+    }),
+  );
+
+  assert.deepEqual(response.results.map((result) => result.product.id), ["safe-1", "partial-1"]);
+  assert.match(response.results[1].safetyNotes.join(" "), /cannot be fully confirmed/);
+});
+
+test("strict safety mode does not exclude incomplete data without a safety filter", () => {
+  const products: Product[] = [
+    {
+      ...baseProduct,
+      id: "missing-no-filter",
+      ingredients: "",
+      dataQuality: "missing-ingredients",
+    },
+  ];
+
+  const response = recommendProducts(products, request({ strictSafetyMode: true }));
+
+  assert.equal(response.results.length, 1);
+  assert.equal(response.results[0].product.id, "missing-no-filter");
+  assert.match(response.results[0].safetyNotes.join(" "), /would be excluded in strict safety mode/);
+});
+
 test("returns clear no-results reason when exclusions remove every product", () => {
   const products: Product[] = [
     {
