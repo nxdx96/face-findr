@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "domains": ["makeup", "skincare", "haircare"],
+  "categories": [
+    {
+      "slug": "makeup-blush",
+      "display_name": "Blush",
+      "domain": "makeup",
+      "subcategory": "blush",
+      "source_values": ["blush"]
+    },
+    {
+      "slug": "makeup-eyeliner",
+      "display_name": "Eyeliner",
+      "domain": "makeup",
+      "subcategory": "eyeliner",
+      "source_values": ["eyeliner"]
+    },
+    {
+      "slug": "makeup-eyeshadow",
+      "display_name": "Eyeshadow",
+      "domain": "makeup",
+      "subcategory": "eyeshadow",
+      "source_values": ["eyeshadow"]
+    },
+    {
+      "slug": "makeup-foundation",
+      "display_name": "Foundation",
+      "domain": "makeup",
+      "subcategory": "foundation",
+      "source_values": ["foundation"]
+    },
+    {
+      "slug": "haircare-shampoo",
+      "display_name": "Shampoo",
+      "domain": "haircare",
+      "subcategory": "shampoo",
+      "source_values": ["shampoo"]
+    },
+    {
+      "slug": "haircare-conditioner",
+      "display_name": "Conditioner",
+      "domain": "haircare",
+      "subcategory": "conditioner",
+      "source_values": ["conditioner"]
+    },
+    {
+      "slug": "skincare-cleanser",
+      "display_name": "Cleanser",
+      "domain": "skincare",
+      "subcategory": "cleanser",
+      "source_values": ["face cleanser", "face wash"]
+    },
+    {
+      "slug": "skincare-moisturizer",
+      "display_name": "Moisturizer",
+      "domain": "skincare",
+      "subcategory": "moisturizer",
+      "source_values": ["face moisturizer", "moisturizer"]
+    }
+  ]
+}
