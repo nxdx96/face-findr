@@ -1,8 +1,8 @@
-# Face-Findr Version 2 Implementation Plan
+# Ingredi-Findr Version 2 Implementation Plan
 
 ## 1. Review of the existing codebase and scraped dataset
 
-Face-Findr v1 is a portfolio-style beauty discovery app that uses a clickable face map to explore a limited set of makeup categories. The current application is built with static HTML, vanilla JavaScript, Bootstrap, p5.js, D3, Plotly, a small Express static server, a Flask data-prep script, and CSV/JSON product data.
+Ingredi-Findr v1 is a portfolio-style beauty discovery app that uses a clickable face map to explore a limited set of makeup categories. The current application is built with static HTML, vanilla JavaScript, Bootstrap, p5.js, D3, Plotly, a small Express static server, a Flask data-prep script, and CSV/JSON product data.
 
 Current repo facts:
 
@@ -378,7 +378,7 @@ Assumptions:
 
 Open questions:
 
-- Should v2 keep the Face-Findr name and visual identity, or introduce a refreshed brand direction?
+- Should v2 keep the Ingredi-Findr name and visual identity, or introduce a refreshed brand direction?
 - Should product data remain static from the existing scrape for MVP, or should v2 include a refreshable scraping/import pipeline?
 - Which categories should launch first if the full dataset needs to be narrowed for quality: all categories, only haircare/skincare, or the original four makeup categories plus haircare?
 - Should strict safety mode be the default whenever users enter allergies or sensitivities?

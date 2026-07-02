@@ -1,4 +1,4 @@
-# Face-Findr V2 API Contract
+# Ingredi-Findr V2 API Contract
 
 ## `POST /api/recommendations`
 

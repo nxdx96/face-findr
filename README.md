@@ -1,6 +1,6 @@
-# Face-Findr V2
+# Ingredi-Findr V2
 
-Face-Findr V2 is a deterministic beauty recommendation MVP for makeup, skincare, and haircare products. A user completes onboarding, submits structured preferences to `POST /api/recommendations`, and receives ranked product cards with match reasons, safety notes, and ingredient data-quality labels.
+Ingredi-Findr V2 is a deterministic beauty recommendation MVP for makeup, skincare, and haircare products. A user completes onboarding, submits structured preferences to `POST /api/recommendations`, and receives ranked product cards with match reasons, safety notes, and ingredient data-quality labels.
 
 The legacy application is preserved under `v1/`. The V2 app lives under `src/` and uses the scraped dataset in `raw_data/merge_df.csv`.
 
@@ -10,7 +10,7 @@ The legacy application is preserved under `v1/`. The V2 app lives under `src/` a
 - LLM output is never allowed to decide whether a product contains an avoided ingredient.
 - Strict safety mode defaults on for allergies and sensitivities.
 - In strict safety mode, products with missing or unparseable ingredient data are excluded when allergy or sensitivity filters are active.
-- Recommendations are informational. Face-Findr does not diagnose, treat, or guarantee that any product is safe or reaction-free.
+- Recommendations are informational. Ingredi-Findr does not diagnose, treat, or guarantee that any product is safe or reaction-free.
 
 ## Setup
 

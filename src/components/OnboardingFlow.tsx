@@ -203,8 +203,8 @@ export function OnboardingFlow() {
           style={{
             display: "block",
             height: "auto",
-            maxHeight: "42vh",
-            maxWidth: "min(68vw, 28rem)",
+            maxHeight: "63vh",
+            maxWidth: "min(90vw, 42rem)",
             objectFit: "contain",
             width: "100%",
           }}

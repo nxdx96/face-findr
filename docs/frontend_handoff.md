@@ -1,4 +1,4 @@
-# Face-Findr V2 Frontend Handoff
+# Ingredi-Findr V2 Frontend Handoff
 
 ## Routes
 
