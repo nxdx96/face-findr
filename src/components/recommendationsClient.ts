@@ -114,7 +114,7 @@ export async function fetchIngredientSuggestions(query: string): Promise<Ingredi
   const normalized = query.trim().toLowerCase();
   if (normalized.length < 2) return [];
 
-  if (useLocalMocks()) return filterMockIngredientSuggestions(normalized);
+  if (shouldUseLocalMocks()) return filterMockIngredientSuggestions(normalized);
 
   const response = await fetch(`/api/ingredients/search?q=${encodeURIComponent(query)}&limit=10`, {
     headers: { accept: "application/json" },
@@ -126,7 +126,7 @@ export async function fetchIngredientSuggestions(query: string): Promise<Ingredi
 }
 
 export async function fetchRecommendations(request: RecommendationRequest): Promise<RecommendationResponse> {
-  if (!useLocalMocks()) {
+  if (!shouldUseLocalMocks()) {
     const response = await fetch("/api/recommendations", {
       method: "POST",
       headers: { "content-type": "application/json", accept: "application/json" },
@@ -156,7 +156,7 @@ export async function fetchRecommendations(request: RecommendationRequest): Prom
   };
 }
 
-function useLocalMocks(): boolean {
+function shouldUseLocalMocks(): boolean {
   return process.env.NEXT_PUBLIC_FACE_FINDR_USE_MOCKS === "true";
 }
 

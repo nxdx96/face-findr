@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import Image from "next/image";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Dispatch, ReactNode, SetStateAction } from "react";
 import type {
   AvoidedIngredient,
@@ -70,6 +71,7 @@ const GROUP_OPTIONS: IngredientGroup[] = [
 ];
 const STORE_OPTIONS = ["Ulta", "Sephora", "Target"];
 const STEPS = ["Goal", "Concerns", "Preferences", "Avoid", "Review"];
+type AppScreen = "welcome" | "quiz" | "loadingRecommendations" | "results" | "emptyResults" | "error";
 
 type QuizState = {
   categories: ProductCategory[];
@@ -102,6 +104,7 @@ const DEFAULT_STATE: QuizState = {
 };
 
 export function OnboardingFlow() {
+  const [screen, setScreen] = useState<AppScreen>("welcome");
   const [step, setStep] = useState(0);
   const [state, setState] = useState<QuizState>(DEFAULT_STATE);
   const [ingredientQuery, setIngredientQuery] = useState("");
@@ -115,6 +118,13 @@ export function OnboardingFlow() {
   const isHairFlow = state.categories.includes("haircare");
   const isSkinFlow = state.categories.includes("skincare") || state.categories.includes("makeup");
   const inferredFilters = inferFiltersFromText(state.freeText);
+  const quizCardRef = useRef<HTMLDivElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (screen === "quiz") quizCardRef.current?.focus();
+    if (screen === "results" || screen === "emptyResults" || screen === "error") resultsRef.current?.focus();
+  }, [screen]);
 
   async function updateIngredientSuggestions(value: string) {
     setIngredientQuery(value);
@@ -142,29 +152,75 @@ export function OnboardingFlow() {
 
   async function showResults() {
     setRequestError(null);
+    setResponse(null);
+    setScreen("loadingRecommendations");
     try {
-      setResponse(await fetchRecommendations(buildRecommendationRequest({ ...state, ...applyInferredFilters(state, inferredFilters) })));
+      const nextResponse = await fetchRecommendations(buildRecommendationRequest({ ...state, ...applyInferredFilters(state, inferredFilters) }));
+      setResponse(nextResponse);
+      setScreen(nextResponse.noResultsReason || nextResponse.results.length === 0 ? "emptyResults" : "results");
     } catch {
       setResponse(null);
       setRequestError("Recommendations are unavailable right now. Check the local server and API configuration, then try again.");
+      setScreen("error");
     }
   }
 
+  function enterQuiz() {
+    setScreen("quiz");
+  }
+
+  if (screen === "welcome") {
+    return (
+      <div
+        className="welcome-screen"
+        role="button"
+        tabIndex={0}
+        aria-label="Enter FaceFinder"
+        onClick={enterQuiz}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            enterQuiz();
+          }
+        }}
+        style={{
+          alignItems: "center",
+          cursor: "pointer",
+          display: "flex",
+          justifyContent: "center",
+          minHeight: "100dvh",
+          minWidth: "100vw",
+          padding: "clamp(1.5rem, 5vw, 4rem)",
+        }}
+      >
+        <Image
+          src="/IngrediFindr.png"
+          alt="FaceFinder"
+          width={448}
+          height={240}
+          priority
+          className="welcome-logo"
+          style={{
+            display: "block",
+            height: "auto",
+            maxHeight: "42vh",
+            maxWidth: "min(68vw, 28rem)",
+            objectFit: "contain",
+            width: "100%",
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
-    <>
-      <section className="hero-panel" id="onboarding" aria-labelledby="hero-heading">
-        <div className="hero-copy">
-          <span className="eyebrow">Beauty picks with boundaries</span>
-          <h1 id="hero-heading">Find products that fit your face, hair, budget, and ingredient comfort zone.</h1>
-          <p>
-            Start with a friendly quiz, confirm the filters Face-Findr inferred, then compare products with clear
-            confidence and uncertainty labels.
-          </p>
-        </div>
-        <div className="quiz-card" aria-label="Face-Findr onboarding quiz">
+    <div className="flow-screen">
+      {screen === "quiz" && (
+        <section className="quiz-screen" id="onboarding" aria-label="FaceFinder onboarding quiz">
+        <div className="quiz-card" ref={quizCardRef} tabIndex={-1} aria-label="FaceFinder onboarding quiz">
           <Progress step={step} />
           {step === 0 && (
-            <QuizStep title="What are you shopping for?" description="Choose one or more product worlds. We will only ask relevant follow-up questions.">
+            <QuizStep title="What are you shopping for?" description="Choose one or more product worlds.">
               <div className="option-grid option-grid--three">
                 {PRODUCT_OPTIONS.map((option) => (
                   <button
@@ -339,7 +395,18 @@ export function OnboardingFlow() {
           </div>
         </div>
       </section>
+      )}
 
+      {screen === "loadingRecommendations" && (
+        <section className="loading-screen" role="status" aria-live="polite">
+          <div className="empty-state">
+            <h2>Finding matches</h2>
+          </div>
+        </section>
+      )}
+
+      {(screen === "results" || screen === "emptyResults" || screen === "error") && (
+        <div ref={resultsRef} tabIndex={-1}>
       <RecommendationResults
         response={response}
         error={requestError}
@@ -353,10 +420,13 @@ export function OnboardingFlow() {
           fetchRecommendations(buildRecommendationRequest(next)).then(setResponse).catch(() => {
             setResponse(null);
             setRequestError("Recommendations are unavailable right now. Check the local server and API configuration, then try again.");
+            setScreen("error");
           });
         }}
       />
-    </>
+        </div>
+      )}
+    </div>
   );
 }
 
