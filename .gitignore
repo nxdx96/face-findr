@@ -9,5 +9,4 @@ yarn-error.log*
 .env
 .env.*
 !.env.example
-data/product_ingredients.json 
-data/product_ingredients.json 
+data/product_ingredients.json
