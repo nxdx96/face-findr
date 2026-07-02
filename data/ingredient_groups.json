@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "groups": [
+    {
+      "slug": "fragrance",
+      "display_name": "Fragrance and parfum",
+      "description": "Deterministic matches for fragrance, parfum, perfume, aroma, flavor, and common fragrance allergens present in ingredient lists.",
+      "caution_level": "preference",
+      "members": ["Fragrance", "Limonene", "Linalool"]
+    },
+    {
+      "slug": "sulfates",
+      "display_name": "Sulfates",
+      "description": "Common sulfate surfactants used in haircare and cleansers.",
+      "caution_level": "preference",
+      "members": ["Sodium Laureth Sulfate", "Sodium Lauryl Sulfate", "Ammonium Lauryl Sulfate"]
+    },
+    {
+      "slug": "silicones",
+      "display_name": "Silicones",
+      "description": "Common silicone ingredients and close deterministic aliases.",
+      "caution_level": "preference",
+      "members": ["Dimethicone", "Cyclopentasiloxane", "Amodimethicone"]
+    },
+    {
+      "slug": "essential-oils",
+      "display_name": "Essential oils",
+      "description": "Initial curated set of essential oils and aromatic plant oils.",
+      "caution_level": "preference",
+      "members": ["Lavender Oil", "Tea Tree Oil", "Peppermint Oil"]
+    },
+    {
+      "slug": "coconut",
+      "display_name": "Coconut derivatives",
+      "description": "Coconut oil and common coconut-derived surfactants from INCI names.",
+      "caution_level": "preference",
+      "members": ["Coconut Oil", "Coconut Acid"]
+    }
+  ]
+}
