@@ -10,3 +10,4 @@ yarn-error.log*
 .env.*
 !.env.example
 data/product_ingredients.json 
+data/product_ingredients.json 
