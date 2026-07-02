@@ -1,0 +1,65 @@
+.container {
+    margin: 0px;
+}
+
+h1 {
+    text-align: center;
+    text-transform: uppercase;
+    font-family: 'Lora', serif;
+    letter-spacing: -2px;
+    font-weight: bold;
+}
+
+h3 {
+    text-align: left;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 200;
+    text-transform: uppercase;
+}
+
+h4 {
+    text-align: left;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 200;
+    text-transform: uppercase;
+}
+
+h5 {
+    text-align: center;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 300;
+    text-transform: uppercase;
+}
+
+p {
+    text-align: center;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 200;
+    text-transform: uppercase;
+
+}
+
+a {
+    text-align: center;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 300;
+    text-transform: uppercase;
+}
+
+select {
+    max-width: 240px;
+}
+
+.btn-light {
+    text-align: center;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 100;
+    text-transform: uppercase;
+    box-shadow: 10px 10px 5px grey;
+    background-color: white;
+}
+
+.jumbotron {
+    background-color: white;
+
+} 

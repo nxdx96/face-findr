@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "ingredients": [
+    {
+      "canonical_name": "Fragrance",
+      "normalized_name": "fragrance",
+      "aliases": ["fragrance", "parfum", "perfume", "aroma", "flavor", "flavour", "flavor/aroma"]
+    },
+    {
+      "canonical_name": "Sodium Laureth Sulfate",
+      "normalized_name": "sodium laureth sulfate",
+      "aliases": ["sodium laureth sulfate", "sles", "sodium lauryl ether sulfate"]
+    },
+    {
+      "canonical_name": "Sodium Lauryl Sulfate",
+      "normalized_name": "sodium lauryl sulfate",
+      "aliases": ["sodium lauryl sulfate", "sls", "sodium dodecyl sulfate"]
+    },
+    {
+      "canonical_name": "Ammonium Lauryl Sulfate",
+      "normalized_name": "ammonium lauryl sulfate",
+      "aliases": ["ammonium lauryl sulfate", "als"]
+    },
+    {
+      "canonical_name": "Dimethicone",
+      "normalized_name": "dimethicone",
+      "aliases": ["dimethicone", "dimethiconol", "stearoxy dimethicone", "phenyl trimethicone"]
+    },
+    {
+      "canonical_name": "Cyclopentasiloxane",
+      "normalized_name": "cyclopentasiloxane",
+      "aliases": ["cyclopentasiloxane", "cyclohexasiloxane", "cyclomethicone"]
+    },
+    {
+      "canonical_name": "Amodimethicone",
+      "normalized_name": "amodimethicone",
+      "aliases": ["amodimethicone", "bis-aminopropyl dimethicone"]
+    },
+    {
+      "canonical_name": "Coconut Oil",
+      "normalized_name": "coconut oil",
+      "aliases": ["coconut oil", "cocos nucifera oil", "cocos nucifera (coconut) oil"]
+    },
+    {
+      "canonical_name": "Coconut Acid",
+      "normalized_name": "coconut acid",
+      "aliases": ["coconut acid", "cocos nucifera acid", "coco acid", "cocamidopropyl betaine", "cocamide mea"]
+    },
+    {
+      "canonical_name": "Shea Butter",
+      "normalized_name": "shea butter",
+      "aliases": ["shea butter", "butyrospermum parkii", "butyrospermum parkii butter", "butyrospermum parkii (shea) butter"]
+    },
+    {
+      "canonical_name": "Jojoba Seed Oil",
+      "normalized_name": "jojoba seed oil",
+      "aliases": ["jojoba oil", "simmondsia chinensis seed oil", "simmondsia chinensis (jojoba) seed oil"]
+    },
+    {
+      "canonical_name": "Lavender Oil",
+      "normalized_name": "lavender oil",
+      "aliases": ["lavender oil", "lavandula angustifolia oil", "lavandula angustifolia (lavender) oil"]
+    },
+    {
+      "canonical_name": "Tea Tree Oil",
+      "normalized_name": "tea tree oil",
+      "aliases": ["tea tree oil", "melaleuca alternifolia leaf oil", "melaleuca alternifolia (tea tree) leaf oil"]
+    },
+    {
+      "canonical_name": "Peppermint Oil",
+      "normalized_name": "peppermint oil",
+      "aliases": ["peppermint oil", "mentha piperita oil", "mentha piperita (peppermint) oil"]
+    },
+    {
+      "canonical_name": "Limonene",
+      "normalized_name": "limonene",
+      "aliases": ["limonene", "d-limonene"]
+    },
+    {
+      "canonical_name": "Linalool",
+      "normalized_name": "linalool",
+      "aliases": ["linalool"]
+    },
+    {
+      "canonical_name": "Titanium Dioxide",
+      "normalized_name": "titanium dioxide",
+      "aliases": ["titanium dioxide", "ci 77891"]
+    },
+    {
+      "canonical_name": "Iron Oxides",
+      "normalized_name": "iron oxides",
+      "aliases": ["iron oxides", "ci 77491", "ci 77492", "ci 77499"]
+    }
+  ]
+}

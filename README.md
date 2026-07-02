@@ -1,39 +1,93 @@
-# [Beauty Discovery Tool](https://beauty-application.herokuapp.com/) 
+# Face-Findr V2
 
-## Project Proposal
+Face-Findr V2 is a deterministic beauty recommendation MVP for makeup, skincare, and haircare products. A user completes onboarding, submits structured preferences to `POST /api/recommendations`, and receives ranked product cards with match reasons, safety notes, and ingredient data-quality labels.
 
-Our group set out to create a dynamic, user-interactive beauty discovery tool. We incorporated the data from the previous [ETL project](https://github.com/nawdah/cosmetics-proj), where we webscraped Sephora and Ulta websites and created a dataframe that included the product name, brand, price, rating, ingredients, and where you can find the item. We primarily used JavaScript, specifically p5.js, d3.js, and Plotly.js to construct the interactivity of this application, a Flask component for the API, Postgres SQL for our database, and Python to clean up the dataframe. 
+The legacy application is preserved under `v1/`. The V2 app lives under `src/` and uses the scraped dataset in `raw_data/merge_df.csv`.
 
-## Backend
+## Safety Model
 
-Since we had performed the extraction of data prior to this project, we imported our csv files to Python and cleaned up the data so that it would be ready to load into Postgres. Once the code was loaded up, we used pg8000 to allow us to write SQL queries that would be pertinent for the performance of this application. Within these queries, we dropped products we weren't using. Given the time constraint for this project, we limited our application to just **foundation, blush, eyeshadow, and eyeliner**. Once the finalized databases were created we exported our new data into csv files that we would later call in for our Flask.
+- Hard ingredient exclusions are deterministic and use parser, alias, and ingredient-group matching.
+- LLM output is never allowed to decide whether a product contains an avoided ingredient.
+- Strict safety mode defaults on for allergies and sensitivities.
+- In strict safety mode, products with missing or unparseable ingredient data are excluded when allergy or sensitivity filters are active.
+- Recommendations are informational. Face-Findr does not diagnose, treat, or guarantee that any product is safe or reaction-free.
 
-Our backend component was completed once we used Flask to convert our csv files into a json file using *jsonify*. Using the json file, called *makeup_data.json*, we were able to create the interactive components of our project. 
+## Setup
 
-## Frontend 
+Prerequisites:
 
-In order to start, we needed to construct a frame work for where all of our visualizations would go. Our HTML linked our CSS and JS files together, as well as any extra dependencies, such as Bootstrap, p5, d3, and different fonts. The first row we designated for the title and description. We also attached a button that would instruct the user on how to interact with the interface. 
+- Node.js 22 or newer.
+- npm 11 or newer.
 
-![voices](https://github.com/nawdah/project-2/blob/master/static/images/voice.gif)
+Install dependencies:
 
-To get a voice activated button, we used the p5 library, specifically the speak() function. 
+```powershell
+npm install
+```
 
-Once the button is pressed, a voice is activated that says "Please click a part of the face." For our entertainment, we made the voice a UK female accent. If we follow instructions and click the face, the face image changes and triggers an event listener that populates the bottom of the page with some graphs. 
+Run the V2 app:
 
-![faceclick](https://github.com/nawdah/project-2/blob/master/static/images/click_for_instructions.gif)
+```powershell
+npm run dev
+```
 
-To the right we have a drop down menu that helps users pick out specific products per category. We also included a direct link to purchase the product if the user wishes. 
+Then open `http://localhost:3000`.
 
-![dropdown](https://github.com/nawdah/project-2/blob/master/static/images/drop_down.gif)
+Optional local mock mode:
 
-We coded a facemap on the initial face chart so that when you click it, it'll produce info based on each product type. Here you can see the switching per category.
+```powershell
+$env:NEXT_PUBLIC_FACE_FINDR_USE_MOCKS="true"
+npm run dev
+```
 
-![faces](https://github.com/nawdah/project-2/blob/master/static/images/faces.gif)
+Mock mode is isolated in `src/components/recommendationsClient.ts`; the default frontend path calls the live API routes.
 
-Our plots were created used d3, plotly, and JS features across a few different JS files. Each file had it's specific purposed, given by the name of the file. 
+## Data Commands
 
-## Final Thoughts
+```powershell
+npm run data:audit
+npm run data:normalize
+```
 
-Given the timeframe, we had to scale back on many features. In a future update, we want to populate a column that would showcase the product ratings using a dynamic visualization. We'd also like to incorporate more products in the face chart for a wide range of selection. Finally, we'd also like the application to take in user input of allergies, skin type, and/or hair type and then give a more curated selection. 
+Generated outputs:
 
+- `docs/data_audit_report.md`
+- `data/normalized_products.json`
+- `data/product_ingredients.json`
 
+Current audit summary: 1,718 rows, 2 missing ingredient lists, 43 invalid prices, 6 invalid ratings, 2 malformed URLs, and 1 unknown category row.
+
+## Quality Commands
+
+```powershell
+npm test
+npm run lint
+npm run typecheck
+npm run build
+```
+
+The Node test suite can also run without installed root dependencies:
+
+```powershell
+node --test tests/backend/*.test.ts tests/data-pipeline/*.test.js tests/frontend/*.test.js
+```
+
+## Environment Variables
+
+LLM integration is optional and disabled by default:
+
+- `FACE_FINDR_LLM_ENABLED=true`
+- `FACE_FINDR_LLM_API_KEY`
+- `FACE_FINDR_LLM_ENDPOINT`
+- `FACE_FINDR_LLM_MODEL` defaults to `gpt-5.4-mini`
+- `FACE_FINDR_LLM_TIMEOUT_MS` defaults to `4000`
+
+Frontend local mock mode:
+
+- `NEXT_PUBLIC_FACE_FINDR_USE_MOCKS=true`
+
+No API key is required for the deterministic MVP flow.
+
+## API Contracts
+
+See [docs/api_contract.md](docs/api_contract.md).
