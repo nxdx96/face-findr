@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import type { Dispatch, ReactNode, SetStateAction } from "react";
 import type {
   AvoidedIngredient,
   AvoidedIngredientGroup,
@@ -355,7 +356,7 @@ function Progress({ step }: { step: number }) {
   );
 }
 
-function QuizStep({ title, description, children }: { title: string; description: string; children: React.ReactNode }) {
+function QuizStep({ title, description, children }: { title: string; description: string; children: ReactNode }) {
   return (
     <div className="quiz-step">
       <h2>{title}</h2>
@@ -480,7 +481,7 @@ function ReviewBlock({ title, items }: { title: string; items: string[] }) {
 function toggleArray<K extends keyof QuizState, T extends QuizState[K] extends Array<infer U> ? U : never>(
   key: K,
   value: T,
-  setState: React.Dispatch<React.SetStateAction<QuizState>>,
+  setState: Dispatch<SetStateAction<QuizState>>,
 ) {
   setState((current) => {
     const currentValues = current[key] as T[];
@@ -494,7 +495,7 @@ function toggleArray<K extends keyof QuizState, T extends QuizState[K] extends A
 function toggleAvoidedGroup(
   group: IngredientGroup,
   severity: Severity,
-  setState: React.Dispatch<React.SetStateAction<QuizState>>,
+  setState: Dispatch<SetStateAction<QuizState>>,
 ) {
   setState((current) => {
     const exists = current.avoidedGroups.some((item) => item.group === group);
