@@ -1,8 +1,8 @@
-# Face-Findr: Beauty Discovery Web Application - Project Summary v1
+# Ingredi-Findr: Beauty Discovery Web Application - Project Summary v1
 
 ## Project Overview
 
-This is a **full-stack web application** called **Face-Findr** - an interactive beauty product discovery tool that helps users explore makeup products from Sephora and Ulta. The application uses a creative visual interface where users click on different parts of a face image to discover products in four beauty categories.
+This is a **full-stack web application** called **Ingredi-Findr** - an interactive beauty product discovery tool that helps users explore makeup products from Sephora and Ulta. The application uses a creative visual interface where users click on different parts of a face image to discover products in four beauty categories.
 
 **Live Application**: https://beauty-application.herokuapp.com/
 
@@ -177,4 +177,4 @@ Based on README notes, potential improvements include:
 
 **Document Version**: 1.0
 **Generated**: 2026-07-02
-**Repository**: face-findr
+**Repository**: Ingredi-Findr

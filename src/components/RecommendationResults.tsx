@@ -109,9 +109,6 @@ function ProductCard({ result }: { result: RecommendationResult }) {
           ))}
         </ul>
         <p className="safety-copy">{result.safetyNotes[0]}</p>
-        <a className="purchase-link" href={product.url ?? "#"} target="_blank" rel="noreferrer">
-          View at retailer
-        </a>
       </div>
     </article>
   );

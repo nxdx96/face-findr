@@ -1,6 +1,6 @@
 # Data Pipeline Handoff
 
-Generated for Face-Findr v2 MVP data foundation.
+Generated for Ingredi-Findr v2 MVP data foundation.
 
 ## Scope
 

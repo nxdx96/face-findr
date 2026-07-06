@@ -1,4 +1,4 @@
-# Face-Findr V2 Backend Handoff
+# Ingredi-Findr V2 Backend Handoff
 
 ## Scope
 
@@ -108,7 +108,7 @@ Returns a lightweight status payload:
 ```json
 {
   "status": "ok",
-  "service": "face-findr-recommendation-backend",
+  "service": "Ingredi-Findr-recommendation-backend",
   "llm": "disabled"
 }
 ```
