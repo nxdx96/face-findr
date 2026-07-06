@@ -11,3 +11,4 @@ yarn-error.log*
 !.env.example
 data/product_ingredients.json
 INTERVIEW_APP_NOTES.md
+v1/*
