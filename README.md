@@ -12,7 +12,8 @@ The project is designed around a safety-first recommendation model: ingredient e
 - Strict safety mode for allergy and sensitivity filters.
 - Data-quality labels for complete, partial, missing, or unparseable ingredient data.
 - API routes for recommendations, ingredient search, and runtime health checks.
-- Data audit and normalization scripts for the scraped product dataset.
+- PostgreSQL product catalog migrations and legacy CSV import scripts.
+- Adapter-based Sephora and Ulta scraper parser scaffolding for public product data refreshes.
 
 ## Project Structure
 
@@ -33,6 +34,7 @@ v1/                  Preserved legacy application
 
 - Node.js 22 or newer
 - npm 11 or newer
+- PostgreSQL 15 or newer for database-backed recommendations
 
 ## Getting Started
 
@@ -70,6 +72,21 @@ npm run start
 npm run lint
 npm run typecheck
 npm test
+npm run db:migrate
+npm run db:import:legacy
+npm run scrape:smoke
+npm run scrape:sephora
+npm run scrape:sephora:count
+npm run scrape:sephora:batch
+npm run scrape:sephora:all
+npm run scrape:ulta
+npm run scrape:ulta:count
+npm run scrape:ulta:batch
+npm run scrape:ulta:all
+npm run scrape:ulta:all:shard0
+npm run scrape:ulta:all:shard1
+npm run scrape:ulta:all:shard2
+npm run scrape:ulta:all:shard3
 ```
 
 The test suite can also be run directly with Node:
@@ -78,9 +95,27 @@ The test suite can also be run directly with Node:
 node --test tests/backend/*.test.ts tests/data-pipeline/*.test.js tests/frontend/*.test.js
 ```
 
-## Data Pipeline
+## Database And Data Pipeline
 
-The V2 app uses the scraped source dataset at `raw_data/merge_df.csv`.
+The V2 app uses PostgreSQL as the production product catalog when `DATABASE_URL` is configured. The legacy scraped source dataset at `raw_data/merge_df.csv` is still available as an import source and local fallback.
+
+Required database environment variable:
+
+```text
+DATABASE_URL=postgres://user:password@localhost:5432/ingredi_findr
+```
+
+Run migrations:
+
+```powershell
+npm run db:migrate
+```
+
+Import usable legacy CSV data into PostgreSQL:
+
+```powershell
+npm run db:import:legacy
+```
 
 Audit the raw product data:
 
@@ -100,6 +135,8 @@ Generated outputs:
 - `data/normalized_products.json`
 - `data/product_ingredients.json`
 
+The full generated catalog should not be treated as the active application source. Scrape exports, raw HTML, screenshots, and cache files are ignored by Git.
+
 Current audit summary:
 
 - 1,718 rows
@@ -118,6 +155,58 @@ The app exposes three primary API routes:
 - `GET /api/health` returns basic runtime status.
 
 See [docs/api_contract.md](docs/api_contract.md) for request and response details.
+
+Recommendation product cards display product images when present, graceful fallback media when absent, retailer name, current price/currency when available, rating/review count when available, availability/staleness copy, and a safe external `View at Sephora` or `View at Ulta` link.
+
+## Scraper Smoke Test
+
+The scraper architecture isolates retailer logic behind adapters under `scrapers/`. The smoke command validates Sephora sitemap discovery without writing to the database:
+
+```powershell
+npm run scrape:smoke
+```
+
+Run a limited committed Sephora refresh:
+
+```powershell
+$env:DATABASE_URL="postgres://user:password@localhost:5432/ingredi_findr"
+npm run scrape:sephora
+```
+
+The default Sephora run discovers public product URLs from `https://www.sephora.com/sitemap.xml`, skips disallowed paths, uses a five-product limit, waits five seconds between product pages, extracts public product metadata, and upserts into PostgreSQL with scrape-run/failure logging.
+
+For larger Sephora refreshes:
+
+```powershell
+npm run scrape:sephora:count
+npm run scrape:sephora:batch
+npm run scrape:sephora:all
+```
+
+`scrape:sephora:batch` processes up to 100 not-yet-refreshed product URLs. `scrape:sephora:all` processes the full currently discoverable Sephora sitemap and skips products that already have scraped images. As of July 6, 2026, Sephora's public sitemap discovery returns 25,989 allowed product URLs; with the required five-second delay, a full run is an overnight/multi-day job.
+
+Sephora and Ulta refreshes should use public product/category/sitemap data only, honor robots rules and delays, avoid account/cart/checkout flows, and keep raw scrape artifacts out of Git.
+
+Ulta uses SKU-level product URLs from `https://www.ulta.com/sitemap/index.xml`. Run:
+
+```powershell
+npm run scrape:ulta:count
+npm run scrape:ulta:batch
+npm run scrape:ulta:all
+```
+
+As of July 6, 2026, Ulta public sitemap discovery returns 50,947 allowed SKU product URLs. The batch command processes up to 100 not-yet-refreshed SKU URLs and skips rows that already have scraped images.
+
+For faster Ulta-only full refreshes, run the four shard commands in separate terminals:
+
+```powershell
+npm run scrape:ulta:all:shard0
+npm run scrape:ulta:all:shard1
+npm run scrape:ulta:all:shard2
+npm run scrape:ulta:all:shard3
+```
+
+Shard flags are intentionally rejected for Sephora. Each Ulta shard still uses the configured per-process delay and `--skip-existing-images`, so interrupted shards can be rerun safely.
 
 ## Safety Model
 

@@ -114,11 +114,20 @@ export type Product = {
   name: string;
   category: string;
   price?: number;
+  currency?: string;
   rating?: number;
+  reviewCount?: number;
   details?: string;
   ingredients?: string;
   url?: string;
+  canonicalUrl?: string;
+  imageUrl?: string;
+  imageAltText?: string;
   store?: string;
+  retailerSlug?: string;
+  availabilityStatus?: string;
+  isStale?: boolean;
+  lastScrapedAt?: string;
   dataQuality: ProductDataQuality;
 };
 

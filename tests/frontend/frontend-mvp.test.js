@@ -25,13 +25,15 @@ test("app route renders the onboarding experience without preview chrome", () =>
   assert.doesNotMatch(layout, /V2/);
 });
 
-test("results show required product details without retailer CTA", () => {
+test("results show required product details with retailer CTA and image fallback", () => {
   const results = read("src/components/RecommendationResults.tsx");
   const badge = read("src/components/DataConfidenceBadge.tsx");
 
   assert.match(results, /RecommendationResults/);
-  assert.doesNotMatch(results, /View at retailer/);
-  assert.doesNotMatch(results, /purchase-link/);
+  assert.match(results, /product\.imageUrl/);
+  assert.match(results, /View at/);
+  assert.match(results, /target="_blank"/);
+  assert.match(results, /rel="noopener noreferrer nofollow"/);
   assert.match(results, /Strict ingredient exclusions/);
   assert.match(results, /No products match every strict filter/);
   assert.match(badge, /Ingredient data complete/);

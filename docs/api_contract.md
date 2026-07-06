@@ -35,7 +35,7 @@ Response shape is `RecommendationResponse` from `src/lib/recommendation/schemas.
 
 Each result includes:
 
-- `product`: identity, category, price, rating, store, URL, and `dataQuality`
+- `product`: identity, category, current price/currency, rating/review count, retailer name/slug, product image URL, canonical retailer URL, availability/staleness state, and `dataQuality`
 - `score`
 - `scoreComponents`
 - `matchReasons`
@@ -46,6 +46,8 @@ Safety constraints:
 - Ingredient exclusions use deterministic parser and alias/group matching only.
 - `May Contain` and shade/bundle parsed ingredients count as present for exclusions.
 - Missing or unparseable ingredient data is excluded in strict safety mode when allergy or sensitivity filters exist.
+- Retailer links open directly to public Sephora or Ulta product pages; the app does not embed retailer pages.
+- Price, availability, ingredients, and ratings are based on the latest imported/scraped catalog data and are not guaranteed current.
 - Response copy must avoid medical guarantees or diagnosis/treatment claims.
 
 ## `GET /api/ingredients/search`

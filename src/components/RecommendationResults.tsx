@@ -84,10 +84,24 @@ export function RecommendationResults({
 
 function ProductCard({ result }: { result: RecommendationResult }) {
   const { product } = result;
+  const retailerName = product.store ?? "Retailer";
+  const productUrl = product.canonicalUrl || product.url;
+  const priceLabel = formatPrice(product.price, product.currency);
+  const availabilityLabel = product.isStale
+    ? "Product data may be outdated"
+    : product.availabilityStatus && product.availabilityStatus !== "unknown"
+      ? product.availabilityStatus.replace(/_/g, " ")
+      : "Availability not guaranteed";
+
   return (
     <article className="product-card">
-      <div className="product-card__media" aria-hidden="true">
-        <span>{product.brand.slice(0, 1)}</span>
+      <div className="product-card__media">
+        {product.imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={product.imageUrl} alt={product.imageAltText || `${product.brand} ${product.name}`} loading="lazy" />
+        ) : (
+          <span aria-hidden="true">{product.brand.slice(0, 1)}</span>
+        )}
       </div>
       <div className="product-card__body">
         <div className="product-card__header">
@@ -98,10 +112,14 @@ function ProductCard({ result }: { result: RecommendationResult }) {
           <span className="score-pill">{result.score}% match</span>
         </div>
         <div className="product-meta" aria-label="Product details">
-          <span>${product.price?.toFixed(2) ?? "Price unavailable"}</span>
-          <span>{product.rating?.toFixed(1) ?? "No rating"} stars</span>
-          <span>{product.store ?? "Retailer unavailable"}</span>
+          <span>{priceLabel}</span>
+          <span>
+            {product.rating?.toFixed(1) ?? "No rating"} stars
+            {product.reviewCount ? ` (${product.reviewCount} reviews)` : ""}
+          </span>
+          <span>{retailerName}</span>
         </div>
+        <p className="availability-copy">{availabilityLabel}</p>
         <DataConfidenceBadge status={product.dataQuality} />
         <ul className="reason-list" aria-label="Match reasons">
           {result.matchReasons.slice(0, 3).map((reason) => (
@@ -109,9 +127,23 @@ function ProductCard({ result }: { result: RecommendationResult }) {
           ))}
         </ul>
         <p className="safety-copy">{result.safetyNotes[0]}</p>
+        {productUrl ? (
+          <a className="retailer-link" href={productUrl} target="_blank" rel="noopener noreferrer nofollow">
+            View at {retailerName}
+          </a>
+        ) : null}
       </div>
     </article>
   );
+}
+
+function formatPrice(price: number | undefined, currency = "USD") {
+  if (price === undefined) return "Price unavailable";
+  try {
+    return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(price);
+  } catch {
+    return `$${price.toFixed(2)}`;
+  }
 }
 
 function sortResults(results: RecommendationResult[], sortMode: string) {
