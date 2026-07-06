@@ -2,7 +2,7 @@ import "../styles/globals.css";
 import type { ReactNode } from "react";
 
 export const metadata = {
-  title: "FaceFinder",
+  title: "Ingredi-Findr",
   description: "A modern recommendation-first frontend for beauty product discovery.",
 };
 

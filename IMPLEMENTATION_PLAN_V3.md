@@ -1,4 +1,4 @@
-# FaceFinder Implementation Plan V3
+# Ingredi-Findr Implementation Plan V3
 
 ## Goal
 
@@ -25,11 +25,11 @@ These removals apply to desktop and mobile views.
 
 ### 1. Welcome Screen
 
-The first screen should contain only the FaceFinder logo.
+The first screen should contain only the Ingredi-Findr logo.
 
 Requirements:
 
-- Center the FaceFinder logo both vertically and horizontally.
+- Center the Ingredi-Findr logo both vertically and horizontally.
 - Do not include a header.
 - Do not include a tagline, slogan, paragraph, helper text, CTA button, progress indicator, or footer copy.
 - The entire screen should be clickable or tappable.
@@ -41,7 +41,7 @@ Implementation notes:
 
 - Use a full-viewport welcome state.
 - Treat the logo screen as the first application state, not a marketing hero section.
-- Keep any accessibility label concise, such as `FaceFinder`.
+- Keep any accessibility label concise, such as `Ingredi-Findr`.
 
 ### 2. Quiz Screen
 
@@ -197,7 +197,7 @@ Update or add tests that verify:
 
 - No visible version or preview labels render in the MVP.
 - No header renders in the MVP flow.
-- The welcome screen initially renders only the FaceFinder logo.
+- The welcome screen initially renders only the Ingredi-Findr logo.
 - Clicking or tapping the welcome screen advances to the quiz.
 - The quiz card is visible before submission and recommendations are not visible.
 - Clicking `Show recommendations` hides the quiz card.
@@ -210,7 +210,7 @@ Update or add tests that verify:
 
 The implementation is complete when:
 
-- The first user-facing screen is only the centered FaceFinder logo.
+- The first user-facing screen is only the centered Ingredi-Findr logo.
 - The user can click or tap anywhere on the welcome screen to enter the quiz.
 - The quiz appears as a centered card with no header, hero panel, or hero heading.
 - Recommendations are not displayed until after quiz submission.

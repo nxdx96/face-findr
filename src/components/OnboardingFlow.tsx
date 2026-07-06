@@ -69,7 +69,7 @@ const GROUP_OPTIONS: IngredientGroup[] = [
   "lanolin",
   "dyes-pigments",
 ];
-const STORE_OPTIONS = ["Ulta", "Sephora", "Target"];
+const STORE_OPTIONS = ["Ulta", "Sephora"];
 const STEPS = ["Goal", "Concerns", "Preferences", "Avoid", "Review"];
 type AppScreen = "welcome" | "quiz" | "loadingRecommendations" | "results" | "emptyResults" | "error";
 
@@ -175,7 +175,7 @@ export function OnboardingFlow() {
         className="welcome-screen"
         role="button"
         tabIndex={0}
-        aria-label="Enter FaceFinder"
+        aria-label="Enter Ingredi-Findr"
         onClick={enterQuiz}
         onKeyDown={(event) => {
           if (event.key === "Enter" || event.key === " ") {
@@ -195,7 +195,7 @@ export function OnboardingFlow() {
       >
         <Image
           src="/IngrediFindr.png"
-          alt="FaceFinder"
+          alt="Ingredi-Findr"
           width={448}
           height={240}
           priority
@@ -216,8 +216,8 @@ export function OnboardingFlow() {
   return (
     <div className="flow-screen">
       {screen === "quiz" && (
-        <section className="quiz-screen" id="onboarding" aria-label="FaceFinder onboarding quiz">
-        <div className="quiz-card" ref={quizCardRef} tabIndex={-1} aria-label="FaceFinder onboarding quiz">
+        <section className="quiz-screen" id="onboarding" aria-label="Ingredi-Findr onboarding quiz">
+        <div className="quiz-card" ref={quizCardRef} tabIndex={-1} aria-label="Ingredi-Findr onboarding quiz">
           <Progress step={step} />
           {step === 0 && (
             <QuizStep title="What are you shopping for?" description="Choose one or more product worlds.">

@@ -175,8 +175,12 @@ h3 {
 }
 
 .quiz-card {
+  display: flex;
+  flex-direction: column;
   width: min(39rem, calc(100vw - 1.25rem));
+  height: fit-content;
   max-height: calc(100dvh - 1.25rem);
+  overflow: hidden;
   padding: clamp(0.75rem, 2vw, 1rem);
 }
 
@@ -204,7 +208,10 @@ h3 {
 }
 
 .quiz-step {
+  flex: 1 1 auto;
   min-height: 0;
+  overflow-y: auto;
+  padding-right: 0.15rem;
 }
 
 .option-grid {
@@ -383,6 +390,10 @@ input[type="range"] {
   gap: 0.5rem;
   justify-content: flex-end;
   margin-top: 0.7rem;
+}
+
+.quiz-actions {
+  flex: 0 0 auto;
 }
 
 .button {
