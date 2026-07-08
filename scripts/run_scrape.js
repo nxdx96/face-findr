@@ -12,6 +12,7 @@ const ADAPTERS = {
   sephora: SephoraAdapter,
   ulta: UltaAdapter
 };
+const SHARDED_RETAILERS = new Set(Object.keys(ADAPTERS));
 
 loadLocalEnv();
 
@@ -83,7 +84,7 @@ async function main() {
         const validation = validateExtractedProduct(extracted);
         if (!validation.ok) throw new Error(validation.errors.join("; "));
 
-        const existed = await retailerProductExists(client, extracted.retailerSlug, extracted.canonicalUrl);
+        const existed = await retailerProductExists(client, extracted);
         await client.query("BEGIN");
         await upsertExtractedProduct(client, extracted);
         await client.query("COMMIT");
@@ -129,7 +130,7 @@ function optionalIntegerArg(name) {
 
 function validateShardConfig(retailer, shard, shards) {
   if (shard === undefined && shards === undefined) return null;
-  if (retailer !== "ulta") throw new Error("--shard/--shards are enabled for Ulta only.");
+  if (!SHARDED_RETAILERS.has(retailer)) throw new Error(`--shard/--shards are not enabled for ${retailer}.`);
   if (shard === undefined || shards === undefined) throw new Error("--shard and --shards must be provided together.");
   if (shards < 2) throw new Error("--shards must be at least 2.");
   if (shard < 0 || shard >= shards) throw new Error("--shard must be between 0 and --shards - 1.");
@@ -196,14 +197,18 @@ async function markRetailerComplete(client, retailerId, status) {
   );
 }
 
-async function retailerProductExists(client, retailerSlug, canonicalUrl) {
+async function retailerProductExists(client, product) {
   const result = await client.query(
     `SELECT 1
      FROM retailer_products rp
      JOIN retailers r ON r.id = rp.retailer_id
-     WHERE r.slug = $1 AND rp.canonical_url = $2
+     WHERE r.slug = $1
+       AND (
+         ($2::text IS NOT NULL AND rp.retailer_product_id = $2)
+         OR rp.canonical_url = $3
+       )
      LIMIT 1`,
-    [retailerSlug, canonicalUrl]
+    [product.retailerSlug, product.retailerProductId || null, product.canonicalUrl]
   );
   return Boolean(result.rowCount);
 }
@@ -263,7 +268,11 @@ async function rollbackIfNeeded(client) {
   }
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
+}
+
+module.exports = { applyShard, extractRetailerProductId, validateShardConfig };

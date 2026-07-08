@@ -31,10 +31,11 @@ function productFixture(name, brand) {
 
 test("Sephora adapter extracts public product structured data", () => {
   const adapter = new SephoraAdapter();
-  const product = adapter.extractProduct(productFixture("Serum", "Fixture Brand"), "https://www.sephora.com/product/serum-P12345?icid2=grid");
+  const product = adapter.extractProduct(productFixture("Serum", "Fixture Brand"), "https://www.sephora.com/product/serum-P12345?icid2=grid&skuId=2222222");
 
   assert.equal(product.retailerSlug, "sephora");
   assert.equal(product.retailerProductId, "P12345");
+  assert.equal(product.canonicalUrl, "https://www.sephora.com/product/serum-P12345");
   assert.equal(product.name, "Serum");
   assert.equal(product.brand, "Fixture Brand");
   assert.equal(product.currentPriceCents, 2450);
@@ -42,12 +43,43 @@ test("Sephora adapter extracts public product structured data", () => {
   assert.equal(validateExtractedProduct(product).ok, true);
 });
 
+test("Sephora adapter prefers the matching SKU main product image", () => {
+  const adapter = new SephoraAdapter();
+  const html = `
+    <html>
+      <head>
+        <meta property="og:image" content="https://www.sephora.com/productimages/sku/s1111111-swatch.jpg">
+        <script type="application/ld+json">
+          {
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "name": "Hydrating Serum",
+            "brand": { "name": "Fixture Brand" },
+            "description": "Fixture description",
+            "image": [
+              "https://www.sephora.com/productimages/sku/s1111111-swatch.jpg",
+              "https://www.sephora.com/productimages/sku/s2222222-main-zoom.jpg"
+            ],
+            "offers": { "price": "24.50", "priceCurrency": "USD", "availability": "https://schema.org/InStock" }
+          }
+        </script>
+        <script>window.__fixture={"imageUrl":"https:\\/\\/www.sephora.com\\/productimages\\/sku\\/s2222222-main-zoom.jpg"};</script>
+      </head>
+      <body><h2>Ingredients</h2><p>Water, Glycerin, Fragrance</p></body>
+    </html>
+  `;
+  const product = adapter.extractProduct(html, "https://www.sephora.com/product/hydrating-serum-P12345?skuId=2222222");
+
+  assert.equal(product.imageUrl, "https://www.sephora.com/productimages/sku/s2222222-main-zoom.jpg");
+});
+
 test("Ulta adapter extracts public product structured data", () => {
   const adapter = new UltaAdapter();
-  const product = adapter.extractProduct(productFixture("Cleanser", "Fixture Brand"), "https://www.ulta.com/p/cleanser?sku=1234567");
+  const product = adapter.extractProduct(productFixture("Cleanser", "Fixture Brand"), "https://www.ulta.com/p/cleanser?sku=1234567&cmpid=search");
 
   assert.equal(product.retailerSlug, "ulta");
   assert.equal(product.retailerProductId, "1234567");
+  assert.equal(product.canonicalUrl, "https://www.ulta.com/p/cleanser?sku=1234567");
   assert.equal(product.name, "Cleanser");
   assert.equal(product.brand, "Fixture Brand");
   assert.equal(product.currentPriceCents, 2450);

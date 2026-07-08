@@ -53,12 +53,8 @@ class SephoraAdapter extends RetailerAdapter {
     const jsonLd = findProductJsonLd(html) || {};
     const brand = typeof jsonLd.brand === "object" ? jsonLd.brand.name : jsonLd.brand || regexValue(html, /"brandName":"([^"]+)"/);
     const offer = Array.isArray(jsonLd.offers) ? jsonLd.offers[0] : jsonLd.offers || {};
-    const image = absoluteSephoraUrl(
-      Array.isArray(jsonLd.image)
-        ? jsonLd.image[0]
-        : jsonLd.image || textFromMeta(html, "og:image") || regexValue(html, /<link[^>]+rel="preload"[^>]+href="([^"]*\/productimages\/[^"]+)"/i)
-    );
     const name = normalizeProductName(jsonLd.name || textFromMeta(html, "og:title") || regexValue(html, /"displayName":"([^"]+)"/));
+    const image = extractSephoraImage(html, jsonLd, url, name);
     const currentPriceCents = parsePriceCents(
       offer.price ||
         regexValue(html, /"salePrice":"([^"]+)"/) ||
@@ -100,7 +96,7 @@ function extractSephoraProductId(url) {
 function canonicalizeSephoraUrl(url) {
   const parsed = new URL(url);
   parsed.hash = "";
-  parsed.searchParams.delete("icid2");
+  parsed.search = "";
   return parsed.toString();
 }
 
@@ -121,6 +117,92 @@ function normalizeAvailability(value) {
 function regexValue(html, regex) {
   const match = html.match(regex);
   return match ? unescapeJsonString(match[1]) : "";
+}
+
+function extractSephoraImage(html, jsonLd, productUrl, productName = "") {
+  const candidates = [];
+  addImageCandidate(candidates, jsonLd.image, "jsonLd");
+  addImageCandidate(candidates, textFromMeta(html, "og:image"), "og");
+
+  collectRegexImageCandidates(html, /<link[^>]+rel=["']preload["'][^>]+href=["']([^"']*\/productimages\/[^"']+)["'][^>]*>/gi, candidates, "preload");
+  collectRegexImageCandidates(html, /"(?:imageUrl|imageURL|heroImage|primaryImage|thumbnailUrl|skuImages?)"\s*:\s*"([^"]+)"/gi, candidates, "embedded");
+  collectRegexImageCandidates(html, /"(https?:\\?\/\\?\/[^"]*\/productimages\/[^"]+)"/gi, candidates, "productimages");
+  collectRegexImageCandidates(html, /"(\/productimages\/[^"]+)"/gi, candidates, "productimages");
+
+  const uniqueCandidates = dedupeImageCandidates(candidates);
+  if (uniqueCandidates.length === 0) return "";
+
+  const skuId = extractSkuId(productUrl);
+  uniqueCandidates.sort((left, right) => scoreImageCandidate(right, skuId, productName) - scoreImageCandidate(left, skuId, productName));
+  return uniqueCandidates[0].url;
+}
+
+function addImageCandidate(candidates, value, source) {
+  if (Array.isArray(value)) {
+    value.forEach((item) => addImageCandidate(candidates, item, source));
+    return;
+  }
+  if (value && typeof value === "object") {
+    addImageCandidate(candidates, value.url || value.contentUrl || value.src, source);
+    return;
+  }
+
+  const url = absoluteSephoraUrl(value);
+  if (!url) return;
+  candidates.push({ url, source });
+}
+
+function collectRegexImageCandidates(html, regex, candidates, source) {
+  let match;
+  while ((match = regex.exec(html))) {
+    addImageCandidate(candidates, match[1], source);
+  }
+}
+
+function dedupeImageCandidates(candidates) {
+  const seen = new Set();
+  return candidates.filter((candidate) => {
+    const key = candidate.url.split("?")[0].toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function scoreImageCandidate(candidate, skuId, productName) {
+  let score = 0;
+  const rawUrl = candidate.url;
+  const url = rawUrl.toLowerCase();
+  const decodedUrl = decodeURIComponent(url);
+  const normalizedProductName = normalizeImageText(productName);
+
+  if (/\/productimages\//.test(url)) score += 60;
+  if (/\/productimages\/sku\//.test(url)) score += 50;
+  if (skuId && url.includes(`s${skuId.toLowerCase()}`)) score += 80;
+  if (/(?:^|[-_])(main|primary|hero|zoom)(?:[-_.]|$)/.test(url)) score += 35;
+  if (/\.(?:jpg|jpeg|png|webp)(?:\?|$)/.test(url)) score += 10;
+  if (candidate.source === "og") score += 12;
+  if (candidate.source === "jsonLd") score += 8;
+  if (normalizedProductName && normalizeImageText(decodedUrl).includes(normalizedProductName.slice(0, 24))) score += 8;
+
+  if (/(swatch|shade|variant|color|badge|brandlogo|logo|lazyload-placeholder|placeholder)/.test(url)) score -= 80;
+  if (/(?:^|[-_])(alt|side|back|before|after|ingredient|lifestyle)(?:[-_.]|$)/.test(url)) score -= 35;
+  if (!/^https?:\/\//i.test(rawUrl)) score -= 100;
+
+  return score;
+}
+
+function extractSkuId(productUrl) {
+  try {
+    const parsed = new URL(productUrl);
+    return parsed.searchParams.get("skuId") || parsed.searchParams.get("sku") || "";
+  } catch (_error) {
+    return "";
+  }
+}
+
+function normalizeImageText(value) {
+  return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
 }
 
 function unescapeJsonString(value) {

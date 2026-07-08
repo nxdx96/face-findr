@@ -93,7 +93,7 @@ export function RecommendationResults({
       ) : (
         <div className="product-grid">
           {visibleResults.map((result) => (
-            <ProductCard key={result.product.id} result={result} />
+            <ProductCard key={productCardKey(result)} result={result} />
           ))}
         </div>
       )}
@@ -106,6 +106,11 @@ export function RecommendationResults({
       )}
     </section>
   );
+}
+
+function productCardKey(result: RecommendationResult) {
+  const { product } = result;
+  return [product.retailerSlug, product.canonicalUrl || product.url, product.id].filter(Boolean).join(":");
 }
 
 function ProductCard({ result }: { result: RecommendationResult }) {

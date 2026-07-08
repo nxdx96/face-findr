@@ -149,6 +149,44 @@ async function upsertRetailerProduct(client, product, retailerId, productId) {
       values
     );
     if (updated.rowCount) return;
+
+    const backfilled = await client.query(
+      `UPDATE retailer_products
+       SET product_id = $2,
+           retailer_product_id = $3,
+           retailer_url = $4,
+           canonical_url = $5,
+           image_url = COALESCE($6, image_url),
+           image_alt_text = COALESCE($7, image_alt_text),
+           current_price_cents = COALESCE($8, current_price_cents),
+           currency = $9,
+           rating = COALESCE($10, rating),
+           review_count = COALESCE($11, review_count),
+           availability_status = $12,
+           retailer_category_path = COALESCE($13, retailer_category_path),
+           last_scraped_at = now(),
+           last_seen_at = now(),
+           raw_source_hash = $14,
+           is_stale = false,
+           updated_at = now()
+       WHERE retailer_id = $1
+         AND ctid = (
+           SELECT ctid
+           FROM retailer_products
+           WHERE retailer_id = $1
+             AND retailer_product_id IS NULL
+             AND (
+               canonical_url = $5
+               OR retailer_url = $4
+               OR canonical_url LIKE '%' || $3 || '%'
+               OR retailer_url LIKE '%' || $3 || '%'
+             )
+           ORDER BY updated_at DESC
+           LIMIT 1
+         )`,
+      values
+    );
+    if (backfilled.rowCount) return;
   }
 
   await client.query(
