@@ -25,6 +25,7 @@ const PRODUCT_OPTIONS: { value: ProductCategory; label: string; description: str
   { value: "skincare", label: "Skincare", description: "Cleanse, moisturize, and comfort", domain: "W. 02" },
   { value: "haircare", label: "Haircare", description: "Wash, condition, and style support", domain: "W. 03" },
 ];
+const MAKEUP_CATEGORY_OPTIONS: ProductCategory[] = ["foundation", "blush", "eyeliner", "eyeshadow"];
 
 const SKIN_CONCERN_OPTIONS: SkinConcern[] = [
   "dryness",
@@ -82,6 +83,7 @@ type AppScreen = "welcome" | "quiz" | "loadingRecommendations" | "results" | "em
 
 type QuizState = {
   categories: ProductCategory[];
+  makeupCategories: ProductCategory[];
   skinConcerns: SkinConcern[];
   hairConcerns: HairConcern[];
   scalpConcerns: ScalpConcern[];
@@ -97,6 +99,7 @@ type QuizState = {
 
 const DEFAULT_STATE: QuizState = {
   categories: ["skincare"],
+  makeupCategories: [],
   skinConcerns: [],
   hairConcerns: [],
   scalpConcerns: [],
@@ -122,6 +125,7 @@ export function OnboardingFlow() {
   const [sortMode, setSortMode] = useState("match");
 
   const inferredFilters = useMemo(() => inferFiltersFromText(state.freeText), [state.freeText]);
+  const isMakeupFlow = state.categories.includes("makeup");
   const isHairFlow = state.categories.includes("haircare");
   const isSkinFlow = state.categories.includes("skincare") || state.categories.includes("makeup");
   const quizCardRef = useRef<HTMLDivElement>(null);
@@ -203,6 +207,14 @@ export function OnboardingFlow() {
                         </button>
                       ))}
                     </div>
+                    {isMakeupFlow && (
+                      <ChipGroup
+                        label="Makeup category"
+                        values={MAKEUP_CATEGORY_OPTIONS}
+                        selected={state.makeupCategories}
+                        onToggle={(value) => toggleArray("makeupCategories", value, setState)}
+                      />
+                    )}
                   </QuizStep>
                 )}
 
@@ -592,7 +604,7 @@ function ReviewPanel({ state, inferredFilters, setState, setStep }: { state: Qui
   const confirmed = applyInferredFilters(state, inferredFilters);
   return (
     <div className="receipt-panel">
-      <ReceiptRow label="Shopping for" value={state.categories.map(formatSlug).join(", ")} onEdit={() => setStep(0)} />
+      <ReceiptRow label="Shopping for" value={summarizeShoppingFor(state).join(", ")} onEdit={() => setStep(0)} />
       <ReceiptRow label="Concerns" value={summarizeConcerns(state).join(", ") || "No concerns selected"} onEdit={() => setStep(1)} />
       <ReceiptRow label="Preferences" value={[...state.preferences.map(formatSlug), `$${state.budgetMax} max`, `${state.minimumRating.toFixed(1)} stars min`, ...state.stores].join(", ")} onEdit={() => setStep(2)} />
       <ReceiptRow
@@ -660,7 +672,7 @@ function toggleAvoidedGroup(group: IngredientGroup, severity: Severity, setState
 
 function buildRecommendationRequest(state: QuizState): RecommendationRequest {
   return {
-    goal: { categories: state.categories },
+    goal: { categories: requestCategories(state) },
     concerns: { skin: state.skinConcerns, hair: state.hairConcerns, scalp: state.scalpConcerns },
     preferences: { claims: state.preferences, budget: { max: state.budgetMax }, stores: state.stores, minimumRating: state.minimumRating },
     avoidedIngredients: state.avoidedIngredients,
@@ -668,6 +680,11 @@ function buildRecommendationRequest(state: QuizState): RecommendationRequest {
     strictSafetyMode: state.strictSafetyMode,
     limit: 100,
   };
+}
+
+function requestCategories(state: QuizState): ProductCategory[] {
+  if (!state.categories.includes("makeup") || state.makeupCategories.length === 0) return state.categories;
+  return dedupe([...state.categories.filter((category) => category !== "makeup"), ...state.makeupCategories]);
 }
 
 function inferFiltersFromText(text: string): Partial<QuizState> {
@@ -698,6 +715,16 @@ function applyInferredFilters(state: QuizState, inferred: Partial<QuizState>): Q
 
 function summarizeConcerns(state: QuizState) {
   return [...state.skinConcerns, ...state.hairConcerns, ...state.scalpConcerns].map(formatSlug);
+}
+
+function summarizeShoppingFor(state: QuizState) {
+  if (!state.categories.includes("makeup") || state.makeupCategories.length === 0) {
+    return state.categories.map(formatSlug);
+  }
+  return [
+    ...state.categories.filter((category) => category !== "makeup").map(formatSlug),
+    `makeup: ${state.makeupCategories.map(formatSlug).join(", ")}`,
+  ];
 }
 
 function summarizeAvoidance(state: QuizState) {
