@@ -1,14 +1,15 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import type { RecommendationResponse, RecommendationResult } from "../lib/recommendation/schemas";
 import { DataConfidenceBadge } from "./DataConfidenceBadge";
-import { SafetyNotice } from "./SafetyNotice";
 
 type RecommendationResultsProps = {
   response: RecommendationResponse | null;
   error?: string | null;
   sortMode: string;
   onSortModeChange: (value: string) => void;
+  onEditAnswers: () => void;
   strictSafetyMode: boolean;
   onStrictSafetyModeChange: (value: boolean) => void;
 };
@@ -18,64 +19,89 @@ export function RecommendationResults({
   error,
   sortMode,
   onSortModeChange,
+  onEditAnswers,
   strictSafetyMode,
   onStrictSafetyModeChange,
 }: RecommendationResultsProps) {
+  const [visibleCount, setVisibleCount] = useState(20);
   const sortedResults = sortResults(response?.results ?? [], sortMode);
+  const visibleResults = sortedResults.slice(0, visibleCount);
+  const categories = response?.appliedFilters.categories.map((category) => category.replace(/-/g, " ")).join(", ") || "beauty";
+
+  useEffect(() => {
+    setVisibleCount(20);
+  }, [response, sortMode]);
 
   return (
     <section className="results-section" id="results" aria-labelledby="results-heading">
-      <div className="section-heading">
-        <span className="eyebrow">Your shelf shortlist</span>
-        <h2 id="results-heading">Recommendations</h2>
-        <p>
-          Results come from deterministic category, ingredient-exclusion, and ranking logic using the available product
-          data. Ingredient confidence is shown so incomplete records are not treated as guarantees.
-        </p>
-      </div>
+      <header className="results-header">
+        <div>
+          <span className="eyebrow">Your shortlist - {categories}</span>
+          <h2 id="results-heading">
+            {sortedResults.length || 0} matches, ranked and <span>receipted.</span>
+          </h2>
+          <p>Every card shows its work. Ingredient confidence is visible so incomplete records are not treated as guarantees.</p>
+        </div>
+        <nav className="results-nav" aria-label="Results actions">
+          <button type="button" onClick={onEditAnswers}>Edit my answers</button>
+          <a href="/">Start over</a>
+        </nav>
+      </header>
 
       <div className="results-toolbar" aria-label="Results filters and sorting">
-        <label>
-          Sort
-          <select value={sortMode} onChange={(event) => onSortModeChange(event.target.value)}>
-            <option value="match">Best match</option>
-            <option value="price-low">Price: low to high</option>
-            <option value="rating">Rating</option>
-          </select>
-        </label>
-        <label className="switch-row">
+        <div className="sort-tabs" role="radiogroup" aria-label="Sort results">
+          {[
+            ["match", "Best match"],
+            ["price-low", "Price"],
+            ["rating", "Rating"],
+          ].map(([value, label]) => (
+            <button
+              type="button"
+              key={value}
+              className={sortMode === value ? "is-active" : ""}
+              aria-pressed={sortMode === value}
+              onClick={() => onSortModeChange(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <label className={strictSafetyMode ? "strict-toggle is-on" : "strict-toggle"}>
           <input
             type="checkbox"
             checked={strictSafetyMode}
             onChange={(event) => onStrictSafetyModeChange(event.target.checked)}
           />
-          Strict ingredient exclusions
+          <span>Strict ingredient exclusions - {strictSafetyMode ? "on" : "off"}</span>
         </label>
+        {response && (
+          <p className="result-count" aria-live="polite">
+            {visibleResults.length} shown of {sortedResults.length} · {response.totalExcluded} filtered out
+          </p>
+        )}
       </div>
 
-      <SafetyNotice compact title="Before you buy" />
-
-      {response && (
-        <p className="result-count" aria-live="polite">
-          Showing {sortedResults.length} match(es). {response.totalExcluded} product(s) filtered out.
-        </p>
-      )}
+      <aside className="buy-strip">
+        <strong>Before you buy</strong>
+        <p>Labels change. Always verify the current ingredient list, price, and shade details on the retailer page.</p>
+      </aside>
 
       {error ? (
-        <div className="empty-state" role="status">
-          <h3>Recommendations unavailable</h3>
-          <p>{error}</p>
-        </div>
+        <EmptyState title="Something's off on our end." copy={error} />
       ) : response?.noResultsReason ? (
-        <div className="empty-state" role="status">
-          <h3>No products match every strict filter</h3>
-          <p>{response.noResultsReason}</p>
-        </div>
+        <EmptyState title="No products match every strict filter" copy={response.noResultsReason} />
       ) : (
         <div className="product-grid">
-          {sortedResults.map((result) => (
+          {visibleResults.map((result) => (
             <ProductCard key={result.product.id} result={result} />
           ))}
+        </div>
+      )}
+      {!error && !response?.noResultsReason && visibleCount < sortedResults.length && (
+        <div className="show-more-wrap">
+          <button type="button" className="show-more-button" onClick={() => setVisibleCount((count) => count + 10)}>
+            Show {Math.min(10, sortedResults.length - visibleCount)} more
+          </button>
         </div>
       )}
     </section>
@@ -87,11 +113,7 @@ function ProductCard({ result }: { result: RecommendationResult }) {
   const retailerName = product.store ?? "Retailer";
   const productUrl = product.canonicalUrl || product.url;
   const priceLabel = formatPrice(product.price, product.currency);
-  const availabilityLabel = product.isStale
-    ? "Product data may be outdated"
-    : product.availabilityStatus && product.availabilityStatus !== "unknown"
-      ? product.availabilityStatus.replace(/_/g, " ")
-      : "Availability not guaranteed";
+  const freshnessLabel = product.isStale ? "Price checked earlier" : product.lastScrapedAt ? "Recently checked" : "Check retailer";
 
   return (
     <article className="product-card">
@@ -100,40 +122,49 @@ function ProductCard({ result }: { result: RecommendationResult }) {
           // eslint-disable-next-line @next/next/no-img-element
           <img src={product.imageUrl} alt={product.imageAltText || `${product.brand} ${product.name}`} loading="lazy" />
         ) : (
-          <span aria-hidden="true">{product.brand.slice(0, 1)}</span>
+          <div className="image-fallback" aria-label="No image on file">
+            <span aria-hidden="true">{product.brand.slice(0, 1)}</span>
+            <b>No image on file</b>
+          </div>
         )}
+        <span className="score-pill">{result.score}% match</span>
       </div>
       <div className="product-card__body">
-        <div className="product-card__header">
-          <div>
-            <p className="product-card__brand">{product.brand}</p>
-            <h3>{product.name}</h3>
-          </div>
-          <span className="score-pill">{result.score}% match</span>
-        </div>
-        <div className="product-meta" aria-label="Product details">
-          <span>{priceLabel}</span>
-          <span>
-            {product.rating?.toFixed(1) ?? "No rating"} stars
-            {product.reviewCount ? ` (${product.reviewCount} reviews)` : ""}
-          </span>
-          <span>{retailerName}</span>
-        </div>
-        <p className="availability-copy">{availabilityLabel}</p>
+        <p className="product-meta">
+          <span>{product.brand} - {retailerName}</span>
+          <span>{priceLabel} · {product.rating?.toFixed(1) ?? "No rating"} stars{product.reviewCount ? ` (${product.reviewCount})` : ""}</span>
+        </p>
+        <h3>{product.name}</h3>
         <DataConfidenceBadge status={product.dataQuality} />
-        <ul className="reason-list" aria-label="Match reasons">
-          {result.matchReasons.slice(0, 3).map((reason) => (
-            <li key={reason}>{reason}</li>
-          ))}
-        </ul>
+        <div className="card-divider" />
+        <p className="reason-copy">Why: {result.matchReasons.slice(0, 3).join(" · ")}</p>
         <p className="safety-copy">{result.safetyNotes[0]}</p>
-        {productUrl ? (
-          <a className="retailer-link" href={productUrl} target="_blank" rel="noopener noreferrer nofollow">
-            View at {retailerName}
-          </a>
-        ) : null}
+        <div className="card-divider" />
+        <div className="card-footer">
+          {productUrl ? (
+            <a className="retailer-link" href={productUrl} target="_blank" rel="noopener noreferrer nofollow">
+              View at {retailerName}
+            </a>
+          ) : <span />}
+          <span>{freshnessLabel}</span>
+        </div>
       </div>
     </article>
+  );
+}
+
+function EmptyState({ title, copy }: { title: string; copy: string }) {
+  return (
+    <div className="empty-state" role="status">
+      <span className="empty-blob" />
+      <h3>{title}</h3>
+      <p>{copy}</p>
+      <div className="recovery-chips">
+        <span>Raise budget</span>
+        <span>Remove store</span>
+        <span>Relax strict mode with care</span>
+      </div>
+    </div>
   );
 }
 
