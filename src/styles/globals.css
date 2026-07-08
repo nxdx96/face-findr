@@ -24,6 +24,20 @@
   box-sizing: border-box;
 }
 
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -66,6 +80,20 @@ h2,
 h3,
 p {
   margin-top: 0;
+}
+
+p,
+h1,
+h2,
+h3,
+b,
+strong,
+span,
+a,
+button,
+small {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .app-shell,
@@ -193,13 +221,15 @@ p {
 }
 
 .quiz-screen {
+  display: grid;
   min-height: 100dvh;
   padding: clamp(12px, 2vw, 24px);
 }
 
 .quiz-card {
   display: flex;
-  min-height: calc(100dvh - clamp(24px, 4vw, 48px));
+  height: calc(100dvh - clamp(24px, 4vw, 48px));
+  min-height: 0;
   flex-direction: column;
   overflow: hidden;
   border: 1.5px solid var(--ink);
@@ -210,10 +240,11 @@ p {
 .quiz-header,
 .quiz-footer {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: space-between;
   gap: 28px;
-  padding: 16px 48px;
+  padding: clamp(12px, 2vw, 16px) clamp(18px, 4vw, 48px);
   border-color: var(--ink);
 }
 
@@ -227,6 +258,7 @@ p {
 }
 
 .quiz-header span {
+  text-align: right;
   color: var(--deep-olive);
   font: 700 11px "Space Grotesk", sans-serif;
   letter-spacing: 0.14em;
@@ -235,10 +267,12 @@ p {
 
 .quiz-layout {
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
-  gap: 72px;
+  grid-template-columns: minmax(210px, 280px) minmax(0, 1fr);
+  gap: clamp(24px, 5vw, 72px);
   flex: 1;
-  padding: 56px 48px 48px;
+  min-height: 0;
+  overflow: auto;
+  padding: clamp(24px, 5vh, 56px) clamp(18px, 4vw, 48px) clamp(24px, 4vh, 48px);
 }
 
 .step-rail ol {
@@ -336,7 +370,7 @@ p {
 .quiz-step h1 {
   max-width: 720px;
   margin: 0;
-  font: 600 clamp(34px, 5vw, 46px)/1.15 "Space Grotesk", sans-serif;
+  font: 600 clamp(28px, 5vw, 46px)/1.15 "Space Grotesk", sans-serif;
   letter-spacing: 0;
 }
 
@@ -360,23 +394,23 @@ p {
 .step-body {
   display: grid;
   max-width: 880px;
-  gap: 30px;
-  margin-top: 38px;
+  gap: clamp(20px, 3vh, 30px);
+  margin-top: clamp(24px, 4vh, 38px);
 }
 
 .world-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
   gap: 16px;
 }
 
 .world-card,
 .store-card {
-  min-height: 168px;
+  min-height: clamp(132px, 18vh, 168px);
   border: 1.5px solid var(--border-mid);
   border-radius: 18px;
   background: var(--surface);
-  padding: 20px;
+  padding: clamp(16px, 2.5vw, 20px);
   text-align: left;
   transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
 }
@@ -405,7 +439,7 @@ p {
 .world-card strong {
   display: block;
   margin-bottom: 8px;
-  font: 700 26px "Bricolage Grotesque", sans-serif;
+  font: 700 clamp(22px, 3vw, 26px) "Bricolage Grotesque", sans-serif;
 }
 
 .world-card > span:not(.world-index) {
@@ -474,7 +508,7 @@ p {
 
 .store-group > div {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
   gap: 14px;
 }
 
@@ -496,7 +530,7 @@ p {
 
 .range-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
   gap: 28px;
 }
 
@@ -528,6 +562,7 @@ input[type="range"] {
 
 .severity-grid {
   display: inline-flex;
+  max-width: 100%;
   overflow: hidden;
   border: 1.5px solid var(--ink);
   border-radius: 999px;
@@ -537,7 +572,9 @@ input[type="range"] {
 .severity-option {
   display: inline-flex;
   min-height: 44px;
+  min-width: 0;
   align-items: center;
+  justify-content: center;
   padding: 0 22px;
   border-right: 1.5px solid var(--ink);
 }
@@ -599,6 +636,7 @@ input[type="range"] {
 
 .suggestion-list button {
   display: flex;
+  min-width: 0;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
@@ -643,8 +681,8 @@ input[type="range"] {
 
 .receipt-row {
   display: grid;
-  grid-template-columns: 180px minmax(0, 1fr) auto;
-  gap: 22px;
+  grid-template-columns: minmax(120px, 180px) minmax(0, 1fr) auto;
+  gap: clamp(12px, 2vw, 22px);
   align-items: center;
   border-bottom: 1px solid var(--hairline);
   padding: 18px 0;
@@ -681,7 +719,9 @@ input[type="range"] {
 
 .receipt-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
   gap: 10px;
 }
 
@@ -701,6 +741,7 @@ input[type="range"] {
 .progress-track {
   height: 3px;
   flex: 1;
+  min-width: 80px;
   overflow: hidden;
   border-radius: 999px;
   background: rgba(33, 26, 31, 0.12);
@@ -727,7 +768,7 @@ input[type="range"] {
   background: var(--ink);
   box-shadow: 3px 3px 0 var(--hot-pink);
   color: var(--cream);
-  padding: 0 30px;
+  padding: 0 clamp(18px, 3vw, 30px);
   font: 700 14px "Space Grotesk", sans-serif;
 }
 
@@ -772,6 +813,7 @@ input[type="range"] {
 
 .loading-screen > div {
   position: relative;
+  max-width: calc(100% - 32px);
 }
 
 .loading-screen h2 {
@@ -808,6 +850,7 @@ input[type="range"] {
 .results-section {
   min-height: 100vh;
   padding-bottom: 56px;
+  overflow-x: hidden;
 }
 
 .results-header {
@@ -815,13 +858,13 @@ input[type="range"] {
   align-items: flex-start;
   justify-content: space-between;
   gap: 28px;
-  padding: 48px;
+  padding: clamp(24px, 5vw, 48px);
 }
 
 .results-header h2 {
   max-width: 840px;
   margin: 0;
-  font: 700 clamp(40px, 6vw, 54px)/1.08 "Bricolage Grotesque", sans-serif;
+  font: 700 clamp(30px, 6vw, 54px)/1.08 "Bricolage Grotesque", sans-serif;
 }
 
 .results-header p {
@@ -834,6 +877,7 @@ input[type="range"] {
 .results-nav {
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 18px;
   font: 700 11px "Space Grotesk", sans-serif;
   letter-spacing: 0.12em;
@@ -859,15 +903,17 @@ input[type="range"] {
 
 .results-toolbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 18px;
   border-top: 1.5px solid var(--ink);
   border-bottom: 1.5px solid var(--ink);
-  padding: 14px 48px;
+  padding: 14px clamp(18px, 4vw, 48px);
 }
 
 .sort-tabs {
   display: inline-flex;
+  max-width: 100%;
   overflow: hidden;
   border: 1.5px solid var(--ink);
   border-radius: 999px;
@@ -876,6 +922,7 @@ input[type="range"] {
 
 .sort-tabs button {
   min-height: 42px;
+  min-width: 0;
   border: 0;
   border-right: 1.5px solid var(--ink);
   background: transparent;
@@ -895,6 +942,7 @@ input[type="range"] {
 .strict-toggle {
   display: inline-flex;
   min-height: 42px;
+  max-width: 100%;
   align-items: center;
   border: 1.5px solid var(--border-mid);
   border-radius: 999px;
@@ -923,10 +971,11 @@ input[type="range"] {
 
 .buy-strip {
   display: flex;
+  flex-wrap: wrap;
   gap: 16px;
   border-bottom: 1.5px solid var(--ink);
   background: var(--butter);
-  padding: 14px 48px;
+  padding: 14px clamp(18px, 4vw, 48px);
 }
 
 .buy-strip strong {
@@ -942,9 +991,9 @@ input[type="range"] {
 
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 24px;
-  width: min(1184px, calc(100% - 48px));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: clamp(16px, 3vw, 24px);
+  width: min(1184px, calc(100% - clamp(24px, 5vw, 48px)));
   margin: 32px auto 0;
 }
 
@@ -969,6 +1018,7 @@ input[type="range"] {
 }
 
 .product-card {
+  min-width: 0;
   overflow: hidden;
   border: 1.5px solid var(--ink);
   border-radius: 20px;
@@ -978,7 +1028,7 @@ input[type="range"] {
 .product-card__media {
   position: relative;
   display: grid;
-  min-height: 230px;
+  min-height: clamp(170px, 28vw, 230px);
   place-items: center;
   border-bottom: 1.5px solid var(--ink);
   background: repeating-linear-gradient(45deg, #fff3d6 0 10px, #ffe9c2 10px 20px);
@@ -986,7 +1036,7 @@ input[type="range"] {
 
 .product-card__media img {
   width: 100%;
-  height: 230px;
+  height: clamp(170px, 28vw, 230px);
   object-fit: cover;
   background: var(--surface);
 }
@@ -996,7 +1046,7 @@ input[type="range"] {
   place-items: center;
   gap: 8px;
   width: 100%;
-  height: 230px;
+  height: clamp(170px, 28vw, 230px);
   background: #ede4ff;
   color: var(--lavender);
   text-align: center;
@@ -1025,7 +1075,7 @@ input[type="range"] {
 }
 
 .product-card__body {
-  padding: 18px;
+  padding: clamp(14px, 2.5vw, 18px);
 }
 
 .product-meta {
@@ -1042,7 +1092,7 @@ input[type="range"] {
 
 .product-card h3 {
   margin-bottom: 14px;
-  font: 700 21px/1.15 "Space Grotesk", sans-serif;
+  font: 700 clamp(18px, 3vw, 21px)/1.15 "Space Grotesk", sans-serif;
 }
 
 .confidence-badge {
@@ -1096,6 +1146,7 @@ input[type="range"] {
 
 .card-footer {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
@@ -1124,7 +1175,7 @@ input[type="range"] {
   border: 1.5px solid var(--ink);
   border-radius: 20px;
   background: var(--surface);
-  padding: 44px;
+  padding: clamp(24px, 5vw, 44px);
   text-align: center;
 }
 
@@ -1147,7 +1198,7 @@ input[type="range"] {
 
 .empty-state h3 {
   margin-bottom: 12px;
-  font: 700 34px "Space Grotesk", sans-serif;
+  font: 700 clamp(26px, 5vw, 34px) "Space Grotesk", sans-serif;
 }
 
 .empty-state p {
@@ -1209,12 +1260,27 @@ input[type="range"] {
   }
 
   .quiz-header,
-  .quiz-footer,
   .results-header,
   .results-toolbar,
   .buy-strip {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .quiz-footer {
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .quiz-footer .progress-track {
+    order: -1;
+    flex-basis: 100%;
+  }
+
+  .quiz-header span,
+  .results-nav {
+    text-align: left;
+    justify-content: flex-start;
   }
 
   .world-grid,
@@ -1234,6 +1300,10 @@ input[type="range"] {
     width: 100%;
   }
 
+  .sort-tabs {
+    border-radius: 18px;
+  }
+
   .severity-option,
   .sort-tabs button {
     flex: 1;
@@ -1242,6 +1312,157 @@ input[type="range"] {
 
   .result-count {
     margin-left: 0;
+  }
+}
+
+@media (max-width: 520px) {
+  body {
+    min-width: 280px;
+  }
+
+  .welcome-stack {
+    gap: 14px;
+    padding: 22px;
+  }
+
+  .welcome-logo {
+    width: min(86vw, 360px);
+  }
+
+  .welcome-tagline {
+    font-size: clamp(20px, 7vw, 26px);
+  }
+
+  .quiz-screen {
+    padding: 8px;
+  }
+
+  .quiz-card {
+    height: calc(100dvh - 16px);
+    border-radius: 14px;
+  }
+
+  .quiz-header {
+    gap: 10px;
+    padding: 10px 14px;
+  }
+
+  .quiz-header img {
+    width: 92px;
+  }
+
+  .quiz-header span,
+  .eyebrow,
+  .field-label,
+  .result-count,
+  .receipt-row > span,
+  .chip-group legend,
+  .store-group legend {
+    font-size: 10px;
+  }
+
+  .quiz-layout {
+    padding: 22px 14px;
+  }
+
+  .step-description {
+    font-size: 14px;
+  }
+
+  .chip-group > div,
+  .selected-filters,
+  .recovery-chips {
+    gap: 8px;
+  }
+
+  .chip,
+  .token,
+  .recovery-chips span {
+    min-height: 38px;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .severity-grid,
+  .sort-tabs {
+    display: grid;
+    grid-template-columns: 1fr;
+    border-radius: 16px;
+  }
+
+  .severity-option,
+  .sort-tabs button {
+    min-height: 40px;
+    border-right: 0;
+    border-bottom: 1.5px solid var(--ink);
+  }
+
+  .severity-option:last-child,
+  .sort-tabs button:last-child {
+    border-bottom: 0;
+  }
+
+  .suggestion-list button,
+  .card-footer,
+  .product-meta {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .receipt-row,
+  .receipt-row--highlight {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .receipt-actions {
+    justify-content: flex-start;
+  }
+
+  .quiz-footer {
+    padding: 12px 14px;
+  }
+
+  .button,
+  .button--large {
+    min-height: 42px;
+    padding-inline: 18px;
+    font-size: 12px;
+  }
+
+  .results-header,
+  .results-toolbar,
+  .buy-strip {
+    padding-inline: 14px;
+  }
+
+  .strict-toggle {
+    width: 100%;
+  }
+
+  .empty-state {
+    width: min(100% - 16px, 760px);
+    margin-block: 24px;
+  }
+}
+
+@media (max-height: 700px) and (min-width: 721px) {
+  .quiz-header,
+  .quiz-footer {
+    padding-block: 10px;
+  }
+
+  .quiz-header img {
+    width: 96px;
+  }
+
+  .quiz-layout {
+    padding-block: 24px;
+  }
+
+  .world-card,
+  .store-card {
+    min-height: 118px;
   }
 }
 
